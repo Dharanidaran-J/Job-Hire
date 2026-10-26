@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Comparison Matrix | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: 6px;">Multi-Dimensional Analysis</span>
+                <h1 style="font-size: 2rem; font-weight: 800;">Candidate Comparison Matrix</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Compare applicant practical challenge scores, code quality, and skill match side-by-side.
+                </p>
+            </div>
+            <a href="{{ url_for('recruiter.applicants') }}" class="btn btn-secondary">&larr; Back to Applicants</a>
+        </div>
+
+        <!-- Job Selection & Candidate Picker -->
+        <div class="card" style="margin-bottom: 32px; padding: 22px;">
+            <form method="GET" action="{{ url_for('recruiter.compare_candidates') }}" style="display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="margin-bottom: 0; flex: 2; min-width: 260px;">
+                    <label class="form-label" style="font-size: 0.82rem;">Select Target Job</label>
+                    <select name="job_id" class="form-control" onchange="this.form.submit()">
+                        {% for j in jobs %}
+                            <option value="{{ j.id }}" {% if target_job and target_job.id == j.id %}selected{% endif %}>
+                                {{ j.title }} ({{ j.applications.count() }} applicants)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; flex: 3; min-width: 300px;">
+                    <label class="form-label" style="font-size: 0.82rem;">Select Candidates to Compare (2 or 3)</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; max-height: 80px; overflow-y: auto; padding: 8px 12px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); background: #f8fafc;">
+                        {% for stu in available_students %}
+                            {% set is_sel = selected_students and stu in selected_students %}
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; background: #ffffff; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1; cursor: pointer;">
+                                <input type="checkbox" name="candidate_ids" value="{{ stu.id }}" {% if is_sel %}checked{% endif %}>
+                                <span>{{ stu.full_name }}</span>
+                            </label>
+                        {% else %}
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">No candidates have applied to this job opening yet.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="height: 44px; padding: 0 24px;">Update Matrix</button>
+            </form>
+        </div>
+
+        {% if comparison_data and comparison_data.candidates %}
+            <!-- Top Section: Radar Chart & AI Insights -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 32px;">
+                <!-- Radar Chart -->
+                <div class="card" style="padding: 24px;">
+                    <h3 class="card-title" style="font-size: 1.15rem; margin-bottom: 16px;">
+                        Practical Skill & Performance Radar
+                    </h3>
+                    <div style="position: relative; height: 320px; width: 100%;">
+                        <canvas id="candidateRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- AI Comparative Takeaways -->
+                <div class="card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                            <span style="font-size: 1.3rem;">🤖</span>
+                            <h3 class="card-title" style="font-size: 1.15rem;">AI Comparative Insights</h3>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                            {% for takeaway in comparison_data.takeaways %}
+                                <div style="background: #f8fafc; border-left: 4px solid var(--purple-accent); padding: 12px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.9rem; line-height: 1.5; color: var(--navy-dark);">
+                                    {{ takeaway|safe }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; background: #eff6ff; padding: 14px; border-radius: var(--radius-md); border: 1px solid #bfdbfe;">
+                            💡 <strong>Recruiter Tip:</strong> Candidates with verified challenge scores of 85+ have demonstrated reliable SQL normalization and API design in past evaluations.
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <a href="{{ url_for('recruiter.applicants', job_id=target_job.id) }}" class="btn btn-sm btn-secondary">
+                            View Full Applicant Funnel &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Detailed Matrix Table -->
+            <div class="card" style="padding: 24px;">
+                <h3 class="card-title" style="margin-bottom: 18px;">Detailed Side-by-Side Breakdown</h3>
+                <div class="table-responsive">
+                    <table class="custom-table" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th style="width: 220px;">Evaluation Dimension</th>
+                                {% for cand in comparison_data.candidates %}
+                                    <th style="font-size: 0.95rem; color: var(--navy-dark); text-transform: none; font-weight: 800;">
+                                        {{ cand.name }}
+                                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">
+                                            {{ cand.college }} ({{ cand.graduation_year }})
+                                        </div>
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Application Status</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        <span class="badge {{ cand.application_status|status_badge }}">
+                                            {{ cand.application_status }}
+                                        </span>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+
+                            <tr>
+                                <td><strong>AI Skill Match Fit</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        <span class="match-pill {{ 'match-high' if cand.skill_match_percentage >= 80 else ('match-med' if cand.skill_match_percentage >= 50 else 'match-low') }}">
+                                            {{ cand.skill_match_percentage }}% Match
+                                        </span>
+                                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">{{ cand.fit_category }}</div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+
+                            <tr>
+                                <td><strong>Practical Challenge Score</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        {% if cand.challenge_score != 'N/A' %}
+                                            <div style="font-size: 1.25rem; font-weight: 900; color: #16a34a;">
+                                                🎯 {{ cand.challenge_score }}/100
+                                            </div>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ cand.challenge_title }}</div>
+                                        {% else %}
+                                            <span style="font-size: 0.85rem; color: var(--text-muted);">Not Submitted</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+
+                            <tr>
+                                <td><strong>Matched Competencies</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                            {% for m in cand.matched_skills_names %}
+                                                <span class="skill-tag matched" style="font-size: 0.75rem;">✓ {{ m }}</span>
+                                            {% else %}
+                                                <span style="font-size: 0.8rem; color: var(--text-muted);">None</span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+
+                            <tr>
+                                <td><strong>Missing Skills / Gaps</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                            {% for mis in cand.missing_skills_names %}
+                                                <span class="skill-tag missing" style="font-size: 0.75rem;">✗ {{ mis }}</span>
+                                            {% else %}
+                                                <span style="font-size: 0.8rem; color: #059669; font-weight: 600;">Full Match</span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+
+                            <tr>
+                                <td><strong>Project Code Evidence</strong></td>
+                                {% for cand in comparison_data.candidates %}
+                                    <td>
+                                        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
+                                            {% if cand.github_url %}
+                                                <a href="{{ cand.github_url }}" target="_blank" rel="noopener">📦 GitHub Source Code</a>
+                                            {% else %}
+                                                <span style="color: var(--text-muted);">No Repo Link</span>
+                                            {% endif %}
+                                            {% if cand.demo_url %}
+                                                <a href="{{ cand.demo_url }}" target="_blank" rel="noopener" style="color: var(--purple-accent);">🌐 Live Demo Preview</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">⚖️</div>
+                <h3>Select a Job and at least 2 candidates to compare</h3>
+                <p style="color: var(--text-secondary); margin-top: 6px;">
+                    Candidates who apply and submit challenges for the selected role will be rendered on the comparison radar.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if comparison_data and comparison_data.candidates %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const labels = {{ comparison_data.metric_labels|tojson }};
+    const colors = [
+        { bg: 'rgba(99, 102, 241, 0.25)', border: '#6366f1' },
+        { bg: 'rgba(16, 185, 129, 0.25)', border: '#10b981' },
+        { bg: 'rgba(217, 70, 239, 0.25)', border: '#d946ef' }
+    ];
+
+    const datasets = [
+        {% for cand in comparison_data.candidates %}
+        {
+            label: {{ cand.name|tojson }},
+            data: [
+                {{ cand.metrics['Skill Match'] }},
+                {{ cand.metrics['Challenge Score'] }},
+                {{ cand.metrics['Code Quality'] }},
+                {{ cand.metrics['Functionality'] }},
+                {{ cand.metrics['Project Evidence'] }}
+            ],
+            backgroundColor: colors[{{ loop.index0 }} % colors.length].bg,
+            borderColor: colors[{{ loop.index0 }} % colors.length].border,
+            borderWidth: 2,
+            pointBackgroundColor: colors[{{ loop.index0 }} % colors.length].border
+        },
+        {% endfor %}
+    ];
+
+    renderRadarComparison('candidateRadarChart', labels, datasets);
+});
+</script>
+{% endif %}
+{% endblock %}

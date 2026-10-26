@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Real-World Practical Challenges | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="margin-bottom: 28px;">
+            <span class="badge badge-success" style="margin-bottom: 8px;">Practical Assessment Catalog</span>
+            <h1 style="font-size: 2rem; font-weight: 800;">Real-World Coding Challenges</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                Tackle production-style coding problems, submit GitHub repositories or live URLs, and earn verified skill badges for your profile.
+            </p>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="card" style="margin-bottom: 32px; padding: 20px;">
+            <form method="GET" action="{{ url_for('student.challenges') }}" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="margin-bottom: 0; flex: 2; min-width: 240px;">
+                    <label class="form-label" style="font-size: 0.8rem;">Search Challenges</label>
+                    <input type="text" name="q" class="form-control" placeholder="Search by title, requirements..." value="{{ search }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
+                    <label class="form-label" style="font-size: 0.8rem;">Difficulty Level</label>
+                    <select name="difficulty" class="form-control">
+                        <option value="">All Difficulties</option>
+                        <option value="beginner" {% if difficulty == 'beginner' %}selected{% endif %}>Beginner</option>
+                        <option value="intermediate" {% if difficulty == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                        <option value="advanced" {% if difficulty == 'advanced' %}selected{% endif %}>Advanced</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="height: 44px; padding: 0 24px;">Filter</button>
+                {% if search or difficulty %}
+                    <a href="{{ url_for('student.challenges') }}" class="btn btn-secondary" style="height: 44px; padding: 0 14px;" title="Clear filters">✕</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Challenges Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px;">
+            {% for item in challenge_items %}
+                {% set ch = item.challenge %}
+                {% set sub = item.submission %}
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--purple-accent);">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="badge badge-{{ 'success' if ch.difficulty_level == 'beginner' else ('warning' if ch.difficulty_level == 'intermediate' else 'danger') }}">
+                                {{ ch.difficulty_level.title() }}
+                            </span>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">
+                                Max {{ ch.max_score }} Pts
+                            </span>
+                        </div>
+
+                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 8px;">
+                            {{ ch.title }}
+                        </h3>
+
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; display: flex; gap: 12px;">
+                            <span>⏱️ {{ ch.time_limit_minutes or 180 }} Minutes</span>
+                            <span>🏢 By {{ ch.recruiter.company.name if ch.recruiter else 'Platform Official' }}</span>
+                        </div>
+
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            {{ ch.problem_statement[:150] }}...
+                        </p>
+
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">
+                                Required Stack
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                {% for s in ch.skills_list %}
+                                    <span class="skill-tag">{{ s }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Submission Status -->
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                        {% if item.is_submitted %}
+                            <span class="badge {{ sub.status|status_badge }}">
+                                Evaluated: {{ sub.score }}/100
+                            </span>
+                            <a href="{{ url_for('student.challenge_detail', challenge_id=ch.id) }}" class="btn btn-sm btn-secondary">
+                                View Results &rarr;
+                            </a>
+                        {% else %}
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Not Attempted</span>
+                            <a href="{{ url_for('student.challenge_detail', challenge_id=ch.id) }}" class="btn btn-sm btn-primary">
+                                Accept Challenge &rarr;
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">⚡</div>
+                    <h3>No challenges found matching your criteria</h3>
+                    <p style="color: var(--text-secondary); margin-top: 6px;">Try clearing filters or search term.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

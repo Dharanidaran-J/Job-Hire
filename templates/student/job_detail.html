@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company.name }} | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
+            <a href="{{ url_for('student.jobs') }}">&larr; Back to Job Directory</a> /
+            <span>{{ job.company.name }}</span> /
+            <span>{{ job.title }}</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+            <!-- Left Column: Job Details & Application Form -->
+            <div>
+                <div class="card" style="padding: 32px; margin-bottom: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div>
+                            <span class="badge badge-info" style="margin-bottom: 8px;">{{ job.company.name }}</span>
+                            <h1 style="font-size: 2rem; font-weight: 800; color: var(--navy-dark);">{{ job.title }}</h1>
+                        </div>
+                        <span class="badge {{ job.status|status_badge }}" style="font-size: 0.9rem;">{{ job.status.title() }}</span>
+                    </div>
+
+                    <!-- Meta Badges -->
+                    <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>📍 {{ 'Remote' if job.is_remote else job.location }}</span>
+                        <span>💼 {{ job.employment_type.replace('_', ' ').title() }}</span>
+                        <span>⭐ {{ job.experience_level.title() }} Level</span>
+                        <span>💰 {{ job.salary_min|currency }} - {{ job.salary_max|currency }} {{ job.currency }}</span>
+                        {% if job.deadline %}
+                            <span>📅 Deadline: {{ job.deadline.strftime('%b %d, %Y') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div style="margin-bottom: 28px;">
+                        <h3 style="font-size: 1.2rem; margin-bottom: 12px;">About the Role</h3>
+                        <p style="color: var(--text-secondary); line-height: 1.7; white-space: pre-line;">
+                            {{ job.description }}
+                        </p>
+                    </div>
+
+                    <!-- Associated Challenge Banner -->
+                    {% if job.associated_challenge_id and job.challenge %}
+                        <div class="card" style="background: #fdf4ff; border: 1.5px solid #e9d5ff; padding: 20px; margin-bottom: 28px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 1.3rem;">⚡</span>
+                                    <h4 style="font-size: 1.1rem; color: #581c87; font-weight: 700;">Required Practical Challenge</h4>
+                                </div>
+                                <span class="badge badge-primary">Max {{ job.challenge.max_score }} Pts</span>
+                            </div>
+                            <p style="font-size: 0.9rem; color: #4a044e; margin-bottom: 14px;">
+                                <strong>{{ job.challenge.title }}</strong>: This position prioritizes candidates who demonstrate their skills through this practical assignment.
+                            </p>
+
+                            {% if associated_submission %}
+                                <div style="background: #ffffff; border: 1px solid #d8b4fe; border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span style="font-size: 0.85rem; font-weight: 700; color: #059669;">✓ Challenge Submitted</span>
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Score: {{ associated_submission.score }}/100</div>
+                                    </div>
+                                    <a href="{{ url_for('student.challenge_detail', challenge_id=job.challenge.id) }}" class="btn btn-sm btn-secondary">
+                                        View Submission &rarr;
+                                    </a>
+                                </div>
+                            {% else %}
+                                <a href="{{ url_for('student.challenge_detail', challenge_id=job.challenge.id) }}" class="btn btn-sm btn-primary">
+                                    Take Challenge Now &rarr;
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Application Action Form -->
+                    <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px;">Apply for this Position</h3>
+
+                        {% if application %}
+                            <div class="alert alert-info" style="margin-bottom: 0;">
+                                <div>
+                                    <strong>Application Submitted!</strong>
+                                    <div style="font-size: 0.85rem; margin-top: 4px;">
+                                        Current Status: <span class="badge {{ application.status|status_badge }}">{{ application.status }}</span>
+                                        &bull; Applied on {{ application.applied_at.strftime('%b %d, %Y') }}
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('student.my_applications') }}" class="btn btn-sm btn-secondary">View Applications</a>
+                            </div>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('student.apply_job', job_id=job.id) }}">
+                                <div class="form-group">
+                                    <label class="form-label">Cover Letter / Note to Recruiter (Optional)</label>
+                                    <textarea name="cover_letter" class="form-control" rows="3" placeholder="Explain why your practical projects and background align with this opening..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                                    Submit Application &rarr;
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: AI Skill Match Card -->
+            <div>
+                <!-- AI Match Analysis Card -->
+                <div class="card" style="padding: 24px; position: sticky; top: 90px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.3rem;">🤖</span>
+                            <h3 class="card-title" style="font-size: 1.1rem;">AI Skill Fit Analysis</h3>
+                        </div>
+                        <span class="match-pill {{ 'match-high' if match_data.match_percentage >= 80 else ('match-med' if match_data.match_percentage >= 50 else 'match-low') }}">
+                            {{ match_data.match_percentage }}%
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px;">
+                            <span>Fit Category:</span>
+                            <span style="color: var(--primary);">{{ match_data.fit_category }}</span>
+                        </div>
+                        <!-- Progress Bar -->
+                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+                            <div style="width: {{ match_data.match_percentage }}%; height: 100%; background: var(--purple-gradient);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Matched Skills -->
+                    <div style="margin-bottom: 18px;">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #047857; margin-bottom: 8px;">
+                            Matched Competencies ({{ match_data.matched_count }})
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            {% for m in match_data.matched_skills %}
+                                <span class="skill-tag matched">✓ {{ m.name }} ({{ m.proficiency }})</span>
+                            {% else %}
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">None of your recorded skills match directly.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Missing Skills -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #be123c; margin-bottom: 8px;">
+                            Missing Skills / Gaps ({{ match_data.missing_count }})
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            {% for mis in match_data.missing_skills %}
+                                <span class="skill-tag missing">✗ {{ mis.name }} ({{ mis.priority }})</span>
+                            {% else %}
+                                <span style="font-size: 0.8rem; color: #059669; font-weight: 600;">You meet 100% of required skills!</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
+                        <a href="{{ url_for('student.skill_gap', job_id=job.id) }}" class="btn btn-secondary" style="width: 100%; font-size: 0.85rem;">
+                            View Targeted Skill Gap Roadmap &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

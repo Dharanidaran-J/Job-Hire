@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge.title }} | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
+            <a href="{{ url_for('student.challenges') }}">&larr; Back to Challenges</a> /
+            <span>{{ challenge.title }}</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+            <!-- Left Column: Problem Statement & Submission Form -->
+            <div>
+                <div class="card" style="padding: 32px; margin-bottom: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div>
+                            <span class="badge badge-{{ 'success' if challenge.difficulty_level == 'beginner' else ('warning' if challenge.difficulty_level == 'intermediate' else 'danger') }}" style="margin-bottom: 8px;">
+                                {{ challenge.difficulty_level.title() }} Difficulty
+                            </span>
+                            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--navy-dark);">
+                                {{ challenge.title }}
+                            </h1>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">{{ challenge.max_score }} Pts</div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Max Score</span>
+                        </div>
+                    </div>
+
+                    <!-- Meta -->
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>⏱️ Estimated Time: {{ challenge.time_limit_minutes or 180 }} mins</span>
+                        <span>🏢 Reviewing Company: {{ challenge.recruiter.company.name if challenge.recruiter else 'ChallengeHire Official' }}</span>
+                        {% if challenge.submission_deadline %}
+                            <span>📅 Due: {{ challenge.submission_deadline.strftime('%b %d, %Y') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Problem Statement -->
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 10px;">Problem Statement</h3>
+                        <div style="color: var(--text-secondary); line-height: 1.7; white-space: pre-line;">
+                            {{ challenge.problem_statement }}
+                        </div>
+                    </div>
+
+                    <!-- Implementation Instructions -->
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 10px;">Implementation Instructions</h3>
+                        <div style="color: var(--text-secondary); line-height: 1.7; white-space: pre-line; background: #f8fafc; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                            {{ challenge.instructions }}
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Criteria -->
+                    <div style="margin-bottom: 32px;">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 10px;">Evaluation Criteria & Rubric</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                            {{ challenge.evaluation_criteria }}
+                        </p>
+                    </div>
+
+                    <!-- Previous Submission Evaluation Results (If Evaluated) -->
+                    {% if submission and submission.status == 'evaluated' %}
+                        <div class="card" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 24px; margin-bottom: 32px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 1.4rem;">🎯</span>
+                                    <h3 style="font-size: 1.25rem; font-weight: 800; color: #166534;">Your Evaluation Result</h3>
+                                </div>
+                                <span class="badge badge-success" style="font-size: 1rem; padding: 6px 14px;">
+                                    Final Score: {{ submission.score }}/{{ challenge.max_score }}
+                                </span>
+                            </div>
+
+                            <!-- Rubric Breakdown -->
+                            {% if submission.evaluation %}
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+                                    <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #dcfce7; text-align: center;">
+                                        <div style="font-size: 0.75rem; color: #15803d; font-weight: 600;">Code Quality</div>
+                                        <div style="font-size: 1.3rem; font-weight: 800; color: #166534;">{{ submission.evaluation.code_quality_score }}/30</div>
+                                    </div>
+                                    <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #dcfce7; text-align: center;">
+                                        <div style="font-size: 0.75rem; color: #15803d; font-weight: 600;">Functionality</div>
+                                        <div style="font-size: 1.3rem; font-weight: 800; color: #166534;">{{ submission.evaluation.functionality_score }}/40</div>
+                                    </div>
+                                    <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #dcfce7; text-align: center;">
+                                        <div style="font-size: 0.75rem; color: #15803d; font-weight: 600;">UI/UX & Docs</div>
+                                        <div style="font-size: 1.3rem; font-weight: 800; color: #166534;">{{ submission.evaluation.ui_ux_score }}/30</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- AI Feedback Text -->
+                            <div style="background: #ffffff; padding: 16px; border-radius: var(--radius-md); border: 1px solid #dcfce7; margin-bottom: 14px;">
+                                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #15803d; margin-bottom: 8px;">
+                                    🤖 AI Assessor Notes & Rubric Feedback
+                                </div>
+                                <div style="font-size: 0.9rem; color: #374151; line-height: 1.6; white-space: pre-line;">
+                                    {{ submission.feedback }}
+                                </div>
+                            </div>
+
+                            {% if submission.evaluation and submission.evaluation.recruiter_comments %}
+                                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 14px;">
+                                    <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #1d4ed8; margin-bottom: 4px;">
+                                        💼 Recruiter Feedback
+                                    </div>
+                                    <p style="font-size: 0.9rem; color: #1e3a8a; margin: 0;">
+                                        {{ submission.evaluation.recruiter_comments }}
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Submission Form -->
+                    <div style="background: #f8fafc; border: 1.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 26px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 6px;">
+                            {{ 'Update Your Submission' if submission else 'Submit Project Deliverables' }}
+                        </h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                            Provide your project repository link, live deployment URL, and an architectural summary.
+                        </p>
+
+                        <form method="POST" action="{{ url_for('student.submit_challenge', challenge_id=challenge.id) }}" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="form-label">GitHub Repository URL *</label>
+                                <input type="url" name="github_repo_url" class="form-control" value="{{ submission.github_repo_url if submission else '' }}" placeholder="https://github.com/yourusername/repo-name" required>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">Ensure repository is public or contains access for reviewers.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Live Demo URL (Optional)</label>
+                                <input type="url" name="live_demo_url" class="form-control" value="{{ submission.live_demo_url if submission else '' }}" placeholder="https://your-demo-app.vercel.app">
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">Live deployed link (Render, Vercel, Netlify, Railway, or custom domain).</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Attach Project Archive (.zip, optional)</label>
+                                <input type="file" name="project_file" class="form-control" accept=".zip,.tar,.gz">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Technical Approach & Architecture Explanation *</label>
+                                <textarea name="explanation" class="form-control" rows="5" placeholder="Detail your solution: how you designed the database schema, handled API routing, implemented input validation, and structured components..." required>{{ submission.explanation if submission else '' }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                                ⚡ Submit Project & Run AI Evaluation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Required Skills & Assessment Quiz Link -->
+            <div>
+                <!-- Skills Required -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 class="card-title" style="font-size: 1.05rem; margin-bottom: 12px;">Technologies Evaluated</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        {% for s in challenge.skills_list %}
+                            <span class="skill-tag" style="font-size: 0.85rem; padding: 6px 12px;">{{ s }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Submission Rules & Guidance -->
+                <div class="card" style="background: #f8fafc; border: 1px solid var(--border-light);">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;">Submission Checklist</h4>
+                    <ul style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; padding-left: 20px;">
+                        <li>Include a clear README.md with setup instructions.</li>
+                        <li>Implement proper error handling and input validation.</li>
+                        <li>Ensure relational database queries are parameterized.</li>
+                        <li>Check responsiveness across mobile and desktop.</li>
+                        <li>Scoring >= 75 pts automatically awards verified badges.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

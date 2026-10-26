@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width: 680px;">
+        <div class="card" style="padding: 36px; box-shadow: var(--shadow-lg);">
+            <div style="text-align: center; margin-bottom: 28px;">
+                <span class="badge badge-primary" style="margin-bottom: 8px;">Candidate Portal</span>
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--navy-dark);">Create Your Student Profile</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;">
+                    Prove your engineering talent through real code challenges.
+                </p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register_student') }}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="full_name" class="form-control" placeholder="e.g. Alex Rivera" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="email" class="form-control" placeholder="alex@university.edu" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">College / University Name *</label>
+                        <input type="text" name="college_name" class="form-control" placeholder="e.g. Stanford University" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Graduation Year</label>
+                        <input type="number" name="graduation_year" class="form-control" placeholder="2025" min="2020" max="2030">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Degree / Major</label>
+                    <input type="text" name="degree" class="form-control" placeholder="e.g. B.S. in Computer Science">
+                </div>
+
+                <!-- Skills Selection -->
+                <div class="form-group">
+                    <label class="form-label">Select Your Technical Skills</label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                        Select the technologies you have experience with. ChallengeHire uses these for AI job and challenge recommendations.
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 160px; overflow-y: auto; padding: 12px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); background: #f8fafc;">
+                        {% for skill in all_skills %}
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1; font-size: 0.85rem; cursor: pointer; user-select: none;">
+                                <input type="checkbox" name="skills" value="{{ skill.id }}" style="cursor: pointer;">
+                                <span>{{ skill.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">GitHub Profile URL</label>
+                        <input type="url" name="github_url" class="form-control" placeholder="https://github.com/username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Portfolio or LinkedIn URL</label>
+                        <input type="url" name="portfolio_url" class="form-control" placeholder="https://yourportfolio.dev">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Short Bio & Engineering Interests</label>
+                    <textarea name="bio" class="form-control" rows="3" placeholder="Briefly describe what kind of systems you enjoy building..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    Complete Registration & Go to Dashboard &rarr;
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 0.88rem; color: var(--text-secondary);">
+                Already have an account? <a href="{{ url_for('auth.login') }}" style="font-weight: 600;">Log in here</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

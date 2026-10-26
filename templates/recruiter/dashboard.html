@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Recruiter Dashboard | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Recruiter Welcome Banner -->
+        <div class="card" style="margin-bottom: 28px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border: none; padding: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); margin-bottom: 10px;">
+                        Hiring Portal &bull; {{ recruiter.company.name }}
+                    </span>
+                    <h1 style="font-size: 2.1rem; color: #ffffff; font-weight: 800; margin-bottom: 6px;">
+                        Welcome, {{ recruiter.full_name }} 👋
+                    </h1>
+                    <p style="color: #cbd5e1; font-size: 0.95rem;">
+                        {{ recruiter.designation }} &bull; {{ recruiter.company.location }}
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="{{ url_for('recruiter.create_job') }}" class="btn btn-primary">
+                        <span>➕</span> Post Job Opening
+                    </a>
+                    <a href="{{ url_for('recruiter.create_challenge') }}" class="btn btn-dark" style="background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.2);">
+                        <span>⚡</span> Create Challenge
+                    </a>
+                    <a href="{{ url_for('recruiter.compare_candidates') }}" class="btn btn-secondary" style="background: rgba(255, 255, 255, 0.08); color: #ffffff; border-color: rgba(255, 255, 255, 0.2);">
+                        <span>⚖️</span> Compare Candidates
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Stat Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+            <div class="stat-card">
+                <div class="stat-icon blue">💼</div>
+                <div>
+                    <div class="stat-val">{{ stats.total_jobs }}</div>
+                    <div class="stat-label">Active Job Openings</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">👥</div>
+                <div>
+                    <div class="stat-val">{{ stats.total_applicants }}</div>
+                    <div class="stat-label">Total Applicants</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon amber">⏳</div>
+                <div>
+                    <div class="stat-val">{{ stats.pending_applications }}</div>
+                    <div class="stat-label">Pending Reviews</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">🎯</div>
+                <div>
+                    <div class="stat-val">{{ stats.completed_assessments }}</div>
+                    <div class="stat-label">Evaluated Challenges</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px;">
+            <!-- Left Column: Recent Applicants -->
+            <div>
+                <div class="card" style="margin-bottom: 28px;">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.25rem;">📋</span>
+                            <h3 class="card-title">Recent Job Applicants & Submissions</h3>
+                        </div>
+                        <a href="{{ url_for('recruiter.applicants') }}" style="font-size: 0.85rem; font-weight: 600;">
+                            View All ({{ stats.total_applicants }}) &rarr;
+                        </a>
+                    </div>
+
+                    {% if recent_applicants %}
+                        <div class="table-responsive">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Applied Role</th>
+                                        <th>Status</th>
+                                        <th>Applied</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in recent_applicants %}
+                                        <tr>
+                                            <td>
+                                                <div style="font-weight: 700; font-size: 0.95rem; color: var(--navy-dark);">
+                                                    {{ app.student.full_name }}
+                                                </div>
+                                                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                                                    {{ app.student.college_name }}
+                                                </div>
+                                            </td>
+                                            <td>{{ app.job.title }}</td>
+                                            <td>
+                                                <span class="badge {{ app.status|status_badge }}">{{ app.status }}</span>
+                                            </td>
+                                            <td style="font-size: 0.8rem; color: var(--text-muted);">
+                                                {{ app.applied_at.strftime('%b %d') }}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('recruiter.applicants', job_id=app.job_id) }}" class="btn btn-sm btn-secondary" style="font-size: 0.78rem;">
+                                                    Review &rarr;
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 36px 20px; color: var(--text-muted);">
+                            No applicants received yet for your openings.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Your Active Job Postings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Your Job Postings</h3>
+                        <a href="{{ url_for('recruiter.manage_jobs') }}" style="font-size: 0.85rem; font-weight: 600;">Manage All &rarr;</a>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        {% for j in jobs %}
+                            <div style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--navy-dark);">{{ j.title }}</h4>
+                                        <span class="badge {{ j.status|status_badge }}">{{ j.status.title() }}</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                                        {{ 'Remote' if j.is_remote else j.location }} &bull; {{ j.salary_min|currency }} - {{ j.salary_max|currency }}
+                                        &bull; <strong>{{ j.applications.count() }} Applicants</strong>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="{{ url_for('recruiter.applicants', job_id=j.id) }}" class="btn btn-sm btn-primary" style="font-size: 0.8rem;">
+                                        View Funnel ({{ j.applications.count() }})
+                                    </a>
+                                    <a href="{{ url_for('recruiter.edit_job', job_id=j.id) }}" class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">
+                                        Edit
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                You haven't posted any jobs yet. Click "Post Job Opening" above!
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Candidate Funnel Status & Practical Challenges -->
+            <div>
+                <!-- Funnel Doughnut Chart -->
+                <div class="card" style="margin-bottom: 28px;">
+                    <h3 class="card-title" style="margin-bottom: 16px; font-size: 1.1rem;">Recruitment Funnel Breakdown</h3>
+                    <div style="position: relative; height: 220px; width: 100%;">
+                        <canvas id="funnelChart"></canvas>
+                    </div>
+                    <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                        <div>Pending: <strong>{{ stats.pending_applications }}</strong></div>
+                        <div>Evaluated: <strong>{{ stats.completed_assessments }}</strong></div>
+                        <div>Shortlisted: <strong>{{ stats.shortlisted_count }}</strong></div>
+                        <div>Selected: <strong>{{ stats.selected_count }}</strong></div>
+                    </div>
+                </div>
+
+                <!-- Recruiter's Practical Challenges -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" style="font-size: 1.05rem;">Created Challenges</h3>
+                        <a href="{{ url_for('recruiter.manage_challenges') }}" style="font-size: 0.8rem; font-weight: 600;">Manage &rarr;</a>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for ch in challenges %}
+                            <div style="border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <h5 style="font-size: 0.92rem; font-weight: 700; color: var(--navy-dark);">{{ ch.title }}</h5>
+                                    <span class="badge badge-primary" style="font-size: 0.7rem;">{{ ch.difficulty_level }}</span>
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between;">
+                                    <span>Max {{ ch.max_score }} Pts</span>
+                                    <span><strong>{{ ch.submissions.count() }}</strong> Submissions</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.85rem;">
+                                No challenges created yet.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    renderDonutFunnel('funnelChart', 
+        ['Applied', 'Assessment Pending', 'Under Review', 'Shortlisted', 'Selected'],
+        [{{ stats.total_applicants }}, {{ stats.pending_applications }}, {{ stats.completed_assessments }}, {{ stats.shortlisted_count }}, {{ stats.selected_count }}]
+    );
+});
+</script>
+{% endblock %}

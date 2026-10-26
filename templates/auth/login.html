@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Log In | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width: 500px;">
+        <div class="card" style="padding: 36px; box-shadow: var(--shadow-lg);">
+            <div style="text-align: center; margin-bottom: 28px;">
+                <div class="brand-icon" style="margin: 0 auto 14px; width: 48px; height: 48px; font-size: 1.4rem;">⚡</div>
+                <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--navy-dark);">Welcome Back</h1>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">Sign in to your ChallengeHire account</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" id="login-email" class="form-control" value="{{ email or '' }}" placeholder="name@domain.com" required>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin-bottom: 0;">Password</label>
+                        <a href="#" style="font-size: 0.8rem; color: var(--primary);">Forgot password?</a>
+                    </div>
+                    <input type="password" name="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                    Sign In &rarr;
+                </button>
+            </form>
+
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light); text-align: center; font-size: 0.88rem; color: var(--text-secondary);">
+                Don't have an account yet? <br>
+                <a href="{{ url_for('auth.register_student') }}" style="font-weight: 600;">Sign up as Student</a> or 
+                <a href="{{ url_for('auth.register_recruiter') }}" style="font-weight: 600;">Sign up as Recruiter</a>
+            </div>
+
+            <!-- Demo Quick-Fill Credentials Box for Easy Testing -->
+            <div style="margin-top: 24px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: var(--radius-md); padding: 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    <span>⚡</span> <span>Quick Demo Credentials (1-Click Fill)</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="fillCreds('alex.rivera@student.edu', 'password123')" style="font-size: 0.75rem;">
+                        🎓 Student (Alex)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="fillCreds('sarah.jenkins@nexatech.com', 'password123')" style="font-size: 0.75rem;">
+                        💼 Recruiter (Sarah)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="fillCreds('samantha.chen@student.edu', 'password123')" style="font-size: 0.75rem;">
+                        🎓 Student (Samantha)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="fillCreds('marcus.vance@pulseai.io', 'password123')" style="font-size: 0.75rem;">
+                        💼 Recruiter (Marcus)
+                    </button>
+                </div>
+                <div style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 8px;">
+                    Default password: <code>password123</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function fillCreds(email, pass) {
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-pass').value = pass;
+}
+</script>
+{% endblock %}

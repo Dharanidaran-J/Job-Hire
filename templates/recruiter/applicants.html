@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Applicant Funnel & Candidate Reviews | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: 6px;">Candidate Evaluation</span>
+                <h1 style="font-size: 2rem; font-weight: 800;">Applicant Funnel Management</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Screen candidates based on practical challenge performance, project evidence, and verified skill scores.
+                </p>
+            </div>
+            <a href="{{ url_for('recruiter.compare_candidates', job_id=selected_job_id) }}" class="btn btn-secondary">
+                ⚖️ Compare Candidates Side-by-Side
+            </a>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="card" style="margin-bottom: 28px; padding: 20px;">
+            <form method="GET" action="{{ url_for('recruiter.applicants') }}" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 14px; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Filter by Job Opening</label>
+                    <select name="job_id" class="form-control">
+                        <option value="">All Job Openings</option>
+                        {% for j in jobs %}
+                            <option value="{{ j.id }}" {% if selected_job_id == j.id %}selected{% endif %}>
+                                {{ j.title }} ({{ j.applications.count() }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Application Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="Applied" {% if status_filter == 'Applied' %}selected{% endif %}>Applied</option>
+                        <option value="Assessment Pending" {% if status_filter == 'Assessment Pending' %}selected{% endif %}>Assessment Pending</option>
+                        <option value="Under Review" {% if status_filter == 'Under Review' %}selected{% endif %}>Under Review</option>
+                        <option value="Shortlisted" {% if status_filter == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                        <option value="Selected" {% if status_filter == 'Selected' %}selected{% endif %}>Selected</option>
+                        <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Min Challenge Score</label>
+                    <input type="number" name="min_score" class="form-control" placeholder="e.g. 80" value="{{ min_score or '' }}" min="0" max="100">
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary" style="height: 44px; padding: 0 20px;">Filter Funnel</button>
+                    {% if selected_job_id or status_filter or min_score %}
+                        <a href="{{ url_for('recruiter.applicants') }}" class="btn btn-secondary" style="height: 44px; padding: 0 12px; margin-left: 6px;" title="Reset filters">✕</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Applicants Table -->
+        <div class="card" style="padding: 24px;">
+            {% if applicants %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Candidate Name</th>
+                                <th>College / University</th>
+                                <th>Job Opening</th>
+                                <th>Challenge Score</th>
+                                <th>Status</th>
+                                <th>Update Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in applicants %}
+                                {% set app = item.app %}
+                                {% set stu = item.student %}
+                                {% set sub = item.submission %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--navy-dark);">
+                                            {{ stu.full_name }}
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 8px;">
+                                            {% if stu.github_url %}
+                                                <a href="{{ stu.github_url }}" target="_blank" rel="noopener">GitHub</a>
+                                            {% endif %}
+                                            {% if stu.portfolio_url %}
+                                                <a href="{{ stu.portfolio_url }}" target="_blank" rel="noopener">Portfolio</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.88rem;">{{ stu.college_name }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                            {{ stu.degree or 'N/A' }} ({{ stu.graduation_year or '2025' }})
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.88rem; font-weight: 600;">{{ item.job.title }}</div>
+                                    </td>
+                                    <td>
+                                        {% if item.score is not none %}
+                                            <span class="badge {{ 'badge-success' if item.score >= 85 else ('badge-warning' if item.score >= 70 else 'badge-danger') }}" style="font-weight: 800; font-size: 0.85rem;">
+                                                🎯 {{ item.score }}/100
+                                            </span>
+                                        {% else %}
+                                            <span style="font-size: 0.8rem; color: var(--text-muted);">No Submission</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ app.status|status_badge }}">{{ app.status }}</span>
+                                    </td>
+                                    <td>
+                                        <!-- Quick Status Updater -->
+                                        <form method="POST" action="{{ url_for('recruiter.update_application_status', app_id=app.id) }}" style="display: flex; gap: 6px; align-items: center;">
+                                            <select name="status" class="form-control" style="font-size: 0.78rem; padding: 4px 6px; width: 130px;" onchange="this.form.submit()">
+                                                <option value="Applied" {% if app.status == 'Applied' %}selected{% endif %}>Applied</option>
+                                                <option value="Assessment Pending" {% if app.status == 'Assessment Pending' %}selected{% endif %}>Assessment Pending</option>
+                                                <option value="Under Review" {% if app.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                                <option value="Shortlisted" {% if app.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                                <option value="Selected" {% if app.status == 'Selected' %}selected{% endif %}>Selected</option>
+                                                <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        {% if sub %}
+                                            <a href="{{ url_for('recruiter.review_submission', submission_id=sub.id) }}" class="btn btn-sm btn-primary" style="font-size: 0.78rem;">
+                                                Review Code & Rubric &rarr;
+                                            </a>
+                                        {% else %}
+                                            <span style="font-size: 0.78rem; color: var(--text-muted);">Waiting on code</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">👥</div>
+                    <h3>No candidates found matching the selected filter</h3>
+                    <p style="color: var(--text-secondary); margin-top: 6px;">Try expanding your job selection or clearing filters.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

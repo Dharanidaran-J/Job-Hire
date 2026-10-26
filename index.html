@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChallengeHire | AI-Powered Job Recruitment Platform</title>
+    
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .demo-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 9999px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 650px;
+            width: 100%;
+            padding: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="brand-logo">
+                <div class="brand-icon">⚡</div>
+                <span>Challenge<span style="color: #a855f7;">Hire</span></span>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="#featured-jobs" class="nav-link">Featured Jobs</a></li>
+                    <li><a href="#challenges" class="nav-link">Challenges</a></li>
+                    <li><a href="#ai-features" class="nav-link">AI Features</a></li>
+                    <li><a href="#comparison" class="nav-link">Candidate Radar</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-auth">
+                <a href="https://github.com/Dharanidaran-J/Job-Hire" target="_blank" class="btn btn-sm btn-outline-primary" style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub Repo
+                </a>
+                <button onclick="showQuickStartModal()" class="btn btn-sm btn-primary">Run Flask App</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-glow"></div>
+        <div class="container hero-content">
+            <div class="demo-pill">🚀 AI-Based Practical Job Recruitment Management System</div>
+            <h1 class="hero-title">Prove Your Skills. <br><span class="text-gradient">Unlock Your Career.</span></h1>
+            <p class="hero-subtitle">
+                Skip the resume screening black hole. ChallengeHire connects driven candidates with top tech companies through practical real-world challenges, AI-driven skill matching, and transparent, performance-based evaluation.
+            </p>
+            <div class="hero-actions">
+                <a href="#featured-jobs" class="btn btn-primary btn-lg">Explore Jobs</a>
+                <a href="#challenges" class="btn btn-dark btn-lg">Start a Challenge</a>
+                <button onclick="showQuickStartModal()" class="btn btn-secondary btn-lg" style="background: rgba(255,255,255,0.1); color: #ffffff; border-color: rgba(255,255,255,0.2);">Quick Start Guide</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Banner -->
+    <section class="stats-banner">
+        <div class="container">
+            <div class="stats-grid">
+                <div>
+                    <div class="stat-hero-num">12+</div>
+                    <div class="stat-hero-label">Active Job Openings</div>
+                </div>
+                <div>
+                    <div class="stat-hero-num">18+</div>
+                    <div class="stat-hero-label">Real-World Challenges</div>
+                </div>
+                <div>
+                    <div class="stat-hero-num">25+</div>
+                    <div class="stat-hero-label">Partner Tech Companies</div>
+                </div>
+                <div>
+                    <div class="stat-hero-num">94%</div>
+                    <div class="stat-hero-label">AI Match Accuracy</div>
+                </div>
+                <div>
+                    <div class="stat-hero-num">100%</div>
+                    <div class="stat-hero-label">Code-Backed Portfolios</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-primary" style="margin-bottom: 12px;">Methodology</span>
+                <h2 class="section-title">How ChallengeHire Works</h2>
+                <p class="section-subtitle">A transparent 4-step pipeline designed to showcase actual coding and problem-solving talent.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h4 style="margin-bottom: 10px;">Select & Apply</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Browse verified roles. ChallengeHire's AI skill engine instantly calculates your match percentage and highlights missing skills.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h4 style="margin-bottom: 10px;">Tackle Real Challenges</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Build authentic mini-projects: REST APIs, normalized relational databases, and modern responsive frontends.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h4 style="margin-bottom: 10px;">AI & Rubric Scoring</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Submit GitHub repos and live demo URLs. Transparent scoring evaluates code quality, schema architecture, and unit tests.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">4</div>
+                    <h4 style="margin-bottom: 10px;">Fast-Track Shortlisting</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Recruiters review verified project evidence, compare candidate radar charts, and fast-track top engineers directly to interviews.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Jobs Section -->
+    <section id="featured-jobs" class="section" style="background: #f1f5f9;">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-primary" style="margin-bottom: 12px;">Opportunities</span>
+                <h2 class="section-title">Featured Job Openings</h2>
+                <p class="section-subtitle">Verified engineering roles with practical skill requirements.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                
+                <!-- Job Card 1 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <span class="badge badge-info" style="margin-bottom: 6px;">Apex Innovations</span>
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--navy-dark);">Full Stack Python & React Developer</h3>
+                            </div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Architect robust web applications using Python Flask, PostgreSQL, and modern React interfaces with real-time analytics.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Flask</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">REST API</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <strong>₹8,00,000 - ₹14,00,000</strong>
+                            <div style="color: var(--text-muted); font-size: 0.75rem;">Remote / Hybrid</div>
+                        </div>
+                        <button onclick="openJobModal('Full Stack Python & React Developer', 'Apex Innovations', '₹8,00,000 - ₹14,00,000', ['Python', 'Flask', 'JavaScript', 'PostgreSQL', 'REST API'])" class="btn btn-sm btn-primary">View & Apply</button>
+                    </div>
+                </div>
+
+                <!-- Job Card 2 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <span class="badge badge-info" style="margin-bottom: 6px;">CloudMatrix Labs</span>
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--navy-dark);">Backend API & Database Engineer</h3>
+                            </div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Design highly scalable microservices, relational schemas in MySQL/PostgreSQL, and caching layers with Redis.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">MySQL</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">System Design</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <strong>₹10,00,000 - ₹18,00,000</strong>
+                            <div style="color: var(--text-muted); font-size: 0.75rem;">Bangalore / Remote</div>
+                        </div>
+                        <button onclick="openJobModal('Backend API & Database Engineer', 'CloudMatrix Labs', '₹10,00,000 - ₹18,00,000', ['Python', 'MySQL', 'PostgreSQL', 'Docker', 'System Design'])" class="btn btn-sm btn-primary">View & Apply</button>
+                    </div>
+                </div>
+
+                <!-- Job Card 3 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <span class="badge badge-info" style="margin-bottom: 6px;">CognitiveAI Systems</span>
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--navy-dark);">Applied AI & NLP Software Engineer</h3>
+                            </div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Implement machine learning pipelines, LLM-powered evaluators, and semantic candidate recommendation engines.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Machine Learning</span>
+                            <span class="skill-tag">Gemini API</span>
+                            <span class="skill-tag">NLP</span>
+                            <span class="skill-tag">Flask</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <strong>₹12,00,000 - ₹22,00,000</strong>
+                            <div style="color: var(--text-muted); font-size: 0.75rem;">Hyderabad / Remote</div>
+                        </div>
+                        <button onclick="openJobModal('Applied AI & NLP Software Engineer', 'CognitiveAI Systems', '₹12,00,000 - ₹22,00,000', ['Python', 'Machine Learning', 'Gemini API', 'NLP', 'Flask'])" class="btn btn-sm btn-primary">View & Apply</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Technical Challenges Section -->
+    <section id="challenges" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-success" style="margin-bottom: 12px;">Hands-On Coding</span>
+                <h2 class="section-title">Popular Practical Challenges</h2>
+                <p class="section-subtitle">Tackle realistic assignments, submit source code & demo URLs, and build an indisputable portfolio.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                
+                <!-- Challenge 1 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--purple-accent);">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="badge badge-warning">Intermediate</span>
+                            <span style="font-weight: 700; font-size: 0.9rem; color: var(--primary);">Max 100 Pts</span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; color: var(--navy-dark);">
+                            Attendance Management Portal & Database
+                        </h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Build a full-stack student attendance system with role-based login (Student/Teacher), 3NF MySQL/PostgreSQL schema, and dynamic analytics.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
+                            <span class="skill-tag">HTML</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">Python Flask</span>
+                            <span class="skill-tag">SQL</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
+                        <button onclick="openChallengeModal('Attendance Management Portal & Database', 'Intermediate', 100, ['HTML', 'CSS', 'JavaScript', 'Python Flask', 'SQL'])" class="btn btn-sm btn-outline-primary" style="width: 100%;">
+                            Accept Challenge
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Challenge 2 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary);">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="badge badge-danger">Advanced</span>
+                            <span style="font-weight: 700; font-size: 0.9rem; color: var(--primary);">Max 100 Pts</span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; color: var(--navy-dark);">
+                            Secure Role-Based REST API Engine
+                        </h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Implement JWT authentication, rate limiting, granular RBAC middleware, and OpenAPI Swagger documentation in Python.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Flask</span>
+                            <span class="skill-tag">JWT</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">Security</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
+                        <button onclick="openChallengeModal('Secure Role-Based REST API Engine', 'Advanced', 100, ['Python', 'Flask', 'JWT', 'PostgreSQL', 'Security'])" class="btn btn-sm btn-outline-primary" style="width: 100%;">
+                            Accept Challenge
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Challenge 3 -->
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--success);">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="badge badge-success">Beginner</span>
+                            <span style="font-weight: 700; font-size: 0.9rem; color: var(--primary);">Max 100 Pts</span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; color: var(--navy-dark);">
+                            Interactive Recruiter Dashboard UI
+                        </h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            Construct a modern, responsive web dashboard with dark-navy theme, CSS Grid cards, Chart.js graphs, and search filters.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
+                            <span class="skill-tag">HTML5</span>
+                            <span class="skill-tag">CSS3</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">Chart.js</span>
+                            <span class="skill-tag">UI/UX</span>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
+                        <button onclick="openChallengeModal('Interactive Recruiter Dashboard UI', 'Beginner', 100, ['HTML5', 'CSS3', 'JavaScript', 'Chart.js', 'UI/UX'])" class="btn btn-sm btn-outline-primary" style="width: 100%;">
+                            Accept Challenge
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Features & Skill Matching Demonstration -->
+    <section id="ai-features" class="section" style="background: #f8fafc; border-top: 1px solid var(--border-light);">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-primary" style="margin-bottom: 12px;">Explainable AI</span>
+                <h2 class="section-title">AI Skill Matching & Gap Analysis</h2>
+                <p class="section-subtitle">Real-time candidate compatibility scoring and personalized challenge recommendations.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; align-items: center;">
+                
+                <!-- Interactive Skill Calculator -->
+                <div class="card" style="box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; color: var(--navy-dark);">
+                        ⚡ Live Match Percentage Simulator
+                    </h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 18px;">
+                        Toggle candidate skills below to see the AI Skill Engine recalculate match score and gap analysis dynamically:
+                    </p>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 8px;">Job Required Skills: (Apex Innovations)</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <span class="badge badge-primary">Python</span>
+                            <span class="badge badge-primary">Flask</span>
+                            <span class="badge badge-primary">JavaScript</span>
+                            <span class="badge badge-primary">PostgreSQL</span>
+                            <span class="badge badge-primary">REST API</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 8px;">Select Candidate's Verified Skills:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="skill-toggles">
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; padding: 6px 12px; border-radius: 9999px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #4338ca;">
+                                <input type="checkbox" checked onchange="recalculateMatch()" value="Python"> Python
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; padding: 6px 12px; border-radius: 9999px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #4338ca;">
+                                <input type="checkbox" checked onchange="recalculateMatch()" value="Flask"> Flask
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; padding: 6px 12px; border-radius: 9999px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #4338ca;">
+                                <input type="checkbox" checked onchange="recalculateMatch()" value="JavaScript"> JavaScript
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; padding: 6px 12px; border-radius: 9999px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #4338ca;">
+                                <input type="checkbox" onchange="recalculateMatch()" value="PostgreSQL"> PostgreSQL
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; padding: 6px 12px; border-radius: 9999px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #4338ca;">
+                                <input type="checkbox" onchange="recalculateMatch()" value="REST API"> REST API
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="background: #f1f5f9; padding: 16px; border-radius: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.95rem;">AI Match Score</span>
+                            <span id="match-percent" style="font-weight: 800; font-size: 1.25rem; color: var(--primary);">60%</span>
+                        </div>
+                        <div class="progress-bar" style="height: 10px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-bottom: 12px;">
+                            <div id="match-bar" style="width: 60%; height: 100%; background: var(--purple-gradient); transition: width 0.3s ease;"></div>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);" id="match-explanation">
+                            <strong>Matched Skills:</strong> Python, Flask, JavaScript <br>
+                            <strong style="color: #ef4444;">Skill Gap Identified:</strong> PostgreSQL, REST API (Suggested Challenge: Attendance Database)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recruiter Candidate Comparison Radar Chart -->
+                <div id="comparison" class="card" style="box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px; color: var(--navy-dark);">
+                        📊 Recruiter Candidate Comparison
+                    </h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+                        Multi-dimensional evaluation comparing candidate practical submissions side-by-side:
+                    </p>
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="candidateRadarChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Dual Benefits Section -->
+    <section class="section" style="background: #ffffff; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-primary" style="margin-bottom: 12px;">Value Proposition</span>
+                <h2 class="section-title">Built for Candidates & Recruiters</h2>
+                <p class="section-subtitle">Bridging the gap between university graduates and modern engineering teams.</p>
+            </div>
+
+            <div class="benefits-grid">
+                <!-- Student Benefits -->
+                <div class="benefit-box" style="border-top: 4px solid var(--primary);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <span style="font-size: 2rem;">🎓</span>
+                        <h3 style="font-size: 1.35rem; font-weight: 800;">For Students & Job Seekers</h3>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Stand out through tangible engineering proof instead of relying on resume keywords.
+                    </p>
+                    <ul class="benefit-list">
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Real-World Portfolio:</strong> Solve authentic tasks like REST APIs, database design, and responsive UIs.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>AI Skill Gap Analysis:</strong> Identify missing competencies for your dream job with targeted learning paths.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Automated Objective Rubric:</strong> Receive transparent scoring and actionable feedback on code quality.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Direct Recruiter Visibility:</strong> Top submissions are fast-tracked directly to interviews.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Recruiter Benefits -->
+                <div class="benefit-box" style="border-top: 4px solid var(--purple-accent);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <span style="font-size: 2rem;">💼</span>
+                        <h3 style="font-size: 1.35rem; font-weight: 800;">For Hiring Teams & Recruiters</h3>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Dramatically cut screening time and hire candidates who can write production-ready code.
+                    </p>
+                    <ul class="benefit-list">
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Practical Proof of Work:</strong> Review actual GitHub commits, live demo deployments, and written explanations.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Side-by-Side Comparison:</strong> Radar charts comparing candidates across code quality, functionality, and skills.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Customizable Challenges:</strong> Create tailored challenges tied directly to your active tech stack.</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon">✓</span>
+                            <span><strong>Zero Resume Spam:</strong> Filter out unqualified candidates through automated rubric thresholds.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Banner -->
+    <section style="background: var(--navy-dark); padding: 70px 0; text-align: center; color: #ffffff;">
+        <div class="container">
+            <h2 style="font-size: 2.4rem; font-weight: 900; margin-bottom: 16px; color: #ffffff;">
+                Ready to Prove Your Skills?
+            </h2>
+            <p style="font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 32px;">
+                Experience the complete Python Flask full-stack platform locally or explore the GitHub repository.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+                <button onclick="showQuickStartModal()" class="btn btn-primary btn-lg">How to Run Locally</button>
+                <a href="https://github.com/Dharanidaran-J/Job-Hire" target="_blank" class="btn btn-secondary btn-lg" style="background: transparent; color: #ffffff; border-color: #475569;">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: #0b0f19; color: #94a3b8; padding: 40px 0; font-size: 0.9rem; border-top: 1px solid #1e293b;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 1.25rem;">⚡</div>
+                <span style="font-weight: 700; color: #ffffff;">ChallengeHire</span>
+                <span>&copy; 2026 Dharanidaran J. All rights reserved.</span>
+            </div>
+            <div style="display: flex; gap: 24px;">
+                <a href="https://github.com/Dharanidaran-J/Job-Hire" target="_blank" style="color: #94a3b8; text-decoration: none;">GitHub Repository</a>
+                <a href="#how-it-works" style="color: #94a3b8; text-decoration: none;">How It Works</a>
+                <a href="#featured-jobs" style="color: #94a3b8; text-decoration: none;">Jobs</a>
+                <a href="#challenges" style="color: #94a3b8; text-decoration: none;">Challenges</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Job Modal -->
+    <div id="job-modal" class="modal-backdrop" onclick="closeModals(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div>
+                    <span id="modal-company" class="badge badge-info" style="margin-bottom: 6px;">Apex Innovations</span>
+                    <h2 id="modal-job-title" style="font-size: 1.35rem; font-weight: 800; color: var(--navy-dark);">Full Stack Python Developer</h2>
+                </div>
+                <button onclick="closeModals()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8;">&times;</button>
+            </div>
+            <div style="margin-bottom: 16px; font-size: 0.95rem; color: var(--text-secondary);" id="modal-salary">
+                <strong>Package:</strong> ₹8,00,000 - ₹14,00,000 / year
+            </div>
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;">Required Competencies:</h4>
+                <div id="modal-skills" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border-light); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Challenge-Based Hiring Flow:</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    To apply for this role on ChallengeHire, applicants complete the paired practical assessment (Attendance Management Portal). Your submission repository will be automatically evaluated by the AI Rubric and reviewed by hiring managers.
+                </p>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeModals()" class="btn btn-secondary">Close</button>
+                <button onclick="showQuickStartModal()" class="btn btn-primary">Apply via Local App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start Modal -->
+    <div id="quickstart-modal" class="modal-backdrop" onclick="closeModals(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--navy-dark);">🚀 Launching ChallengeHire</h2>
+                <button onclick="closeModals()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8;">&times;</button>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 16px;">
+                To run the full-stack Python Flask backend with live SQLite / Neon PostgreSQL database:
+            </p>
+            <div style="background: #0f172a; color: #38bdf8; padding: 16px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; margin-bottom: 16px; line-height: 1.6;">
+                # 1. Open Terminal or PowerShell in project folder:<br>
+                cd C:\Users\dhara\.gemini\antigravity\scratch\ChallengeHire<br><br>
+                # 2. Run the automated starter script:<br>
+                .\run_localhost.ps1<br><br>
+                # Or start Python directly:<br>
+                python run.py
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                Then open your browser to: <a href="http://127.0.0.1:5000" target="_blank" style="color: var(--primary); font-weight: 700;">http://127.0.0.1:5000</a>
+            </p>
+            <div style="display: flex; justify-content: flex-end;">
+                <button onclick="closeModals()" class="btn btn-primary">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Modal helpers
+        function openJobModal(title, company, salary, skills) {
+            document.getElementById('modal-job-title').innerText = title;
+            document.getElementById('modal-company').innerText = company;
+            document.getElementById('modal-salary').innerHTML = '<strong>Package:</strong> ' + salary;
+            const skillsDiv = document.getElementById('modal-skills');
+            skillsDiv.innerHTML = skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+            document.getElementById('job-modal').style.display = 'flex';
+        }
+
+        function openChallengeModal(title, difficulty, points, skills) {
+            openJobModal(title, difficulty + ' Challenge', points + ' Max Points', skills);
+        }
+
+        function showQuickStartModal() {
+            closeModals();
+            document.getElementById('quickstart-modal').style.display = 'flex';
+        }
+
+        function closeModals(e) {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+        }
+
+        // Live Match Calculator
+        const requiredSkills = ['python', 'flask', 'javascript', 'postgresql', 'rest api'];
+        function recalculateMatch() {
+            const checkedBoxes = document.querySelectorAll('#skill-toggles input[type="checkbox"]:checked');
+            const userSkills = Array.from(checkedBoxes).map(cb => cb.value.toLowerCase());
+            
+            const matched = requiredSkills.filter(s => userSkills.includes(s));
+            const missing = requiredSkills.filter(s => !userSkills.includes(s));
+            const percentage = Math.round((matched.length / requiredSkills.length) * 100);
+
+            document.getElementById('match-percent').innerText = percentage + '%';
+            document.getElementById('match-bar').style.width = percentage + '%';
+            
+            const explanation = document.getElementById('match-explanation');
+            explanation.innerHTML = `
+                <strong>Matched Skills (${matched.length}/${requiredSkills.length}):</strong> ${matched.length ? matched.join(', ') : 'None'}<br>
+                ${missing.length ? `<strong style="color: #ef4444;">Skill Gap Identified:</strong> ${missing.join(', ')} (Suggested Challenges Available)` : '<strong style="color: #10b981;">Perfect Match! Ready for fast-track interview.</strong>'}
+            `;
+        }
+
+        // Initialize Radar Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('candidateRadarChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Code Quality', 'System Architecture', 'DB Normalization', 'Test Coverage', 'UI Responsiveness'],
+                        datasets: [
+                            {
+                                label: 'Rahul Sharma (Student)',
+                                data: [92, 88, 95, 80, 85],
+                                backgroundColor: 'rgba(99, 102, 241, 0.25)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(99, 102, 241, 1)'
+                            },
+                            {
+                                label: 'Priya Patel (Student)',
+                                data: [85, 90, 80, 92, 94],
+                                backgroundColor: 'rgba(124, 58, 237, 0.25)',
+                                borderColor: 'rgba(124, 58, 237, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(124, 58, 237, 1)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: '#e2e8f0' },
+                                grid: { color: '#e2e8f0' },
+                                pointLabels: { font: { size: 11, weight: '600', family: 'Inter' }, color: '#475569' },
+                                suggestedMin: 50,
+                                suggestedMax: 100
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter' } } }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

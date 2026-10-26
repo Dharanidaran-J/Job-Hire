@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ChallengeHire | AI-Powered Practical Recruitment{% endblock %}</title>
+    
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Interactive Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('main.index') }}" class="brand-logo">
+                <div class="brand-icon">⚡</div>
+                <span>Challenge<span style="color: #a855f7;">Hire</span></span>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('main.index') }}" class="nav-link">Home</a></li>
+                    
+                    {% if g.user and g.user.role == 'student' %}
+                        <li><a href="{{ url_for('student.dashboard') }}" class="nav-link">Dashboard</a></li>
+                        <li><a href="{{ url_for('student.jobs') }}" class="nav-link">Explore Jobs</a></li>
+                        <li><a href="{{ url_for('student.challenges') }}" class="nav-link">Challenges</a></li>
+                        <li><a href="{{ url_for('student.my_applications') }}" class="nav-link">My Applications</a></li>
+                        <li><a href="{{ url_for('student.my_submissions') }}" class="nav-link">Submissions</a></li>
+                    {% elif g.user and g.user.role == 'recruiter' %}
+                        <li><a href="{{ url_for('recruiter.dashboard') }}" class="nav-link">Dashboard</a></li>
+                        <li><a href="{{ url_for('recruiter.manage_jobs') }}" class="nav-link">Manage Jobs</a></li>
+                        <li><a href="{{ url_for('recruiter.manage_challenges') }}" class="nav-link">Challenges</a></li>
+                        <li><a href="{{ url_for('recruiter.applicants') }}" class="nav-link">Applicants</a></li>
+                        <li><a href="{{ url_for('recruiter.compare_candidates') }}" class="nav-link">Compare Candidates</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('main.index') }}#how-it-works" class="nav-link">How It Works</a></li>
+                        <li><a href="{{ url_for('main.index') }}#featured-jobs" class="nav-link">Jobs</a></li>
+                        <li><a href="{{ url_for('main.index') }}#challenges" class="nav-link">Challenges</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="nav-link">About</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <div class="nav-auth">
+                {% if g.user %}
+                    <!-- Notification Bell -->
+                    <div style="position: relative;">
+                        <button id="notif-bell-btn" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 1.25rem; padding: 6px; position: relative;">
+                            🔔
+                            <span id="notif-badge" style="display: none; position: absolute; top: 0; right: 0; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; padding: 1px 5px;">0</span>
+                        </button>
+                        <!-- Dropdown Menu -->
+                        <div id="notif-dropdown-menu" style="display: none; position: absolute; right: 0; top: 40px; width: 320px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; z-index: 2000; overflow: hidden;">
+                            <div style="padding: 12px 16px; background: #f8fafc; font-weight: 700; font-size: 0.85rem; border-bottom: 1px solid #e2e8f0; color: #0f172a;">
+                                Notifications
+                            </div>
+                            <div id="notif-items-list" style="max-height: 280px; overflow-y: auto;">
+                                <!-- Loaded dynamically via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role Badge -->
+                    <span class="role-badge {{ g.user.role }}">{{ g.user.role }}</span>
+
+                    <!-- User Name / Profile -->
+                    <a href="{{ url_for('student.profile' if g.user.role == 'student' else 'recruiter.dashboard') }}" class="user-menu-btn">
+                        <span>👤</span>
+                        <span>{{ session.get('user_name', 'Account') }}</span>
+                    </a>
+
+                    <!-- Logout Button -->
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-dark" title="Sign Out">Sign Out</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-dark">Log In</a>
+                    <a href="{{ url_for('auth.register_student') }}" class="btn btn-sm btn-primary">Join as Student</a>
+                    <a href="{{ url_for('auth.register_recruiter') }}" class="btn btn-sm btn-secondary" style="color: #cbd5e1; background: transparent; border-color: #334155;">Hire Talent</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Message Banners -->
+    <div class="container" style="margin-top: 20px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: inherit; line-height: 1;">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main style="flex: 1;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="brand-logo" style="margin-bottom: 14px;">
+                        <div class="brand-icon">⚡</div>
+                        <span>Challenge<span style="color: #a855f7;">Hire</span></span>
+                    </div>
+                    <p style="font-size: 0.9rem; line-height: 1.6; max-width: 320px;">
+                        The AI-powered recruitment management platform that evaluates candidates on practical code and real-world challenges, not just resumes.
+                    </p>
+                    <div style="margin-top: 16px; font-size: 0.8rem; color: #64748b;">
+                        Powered by Python Flask, MySQL, and Intelligent Skill Matching
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h5>For Candidates</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('student.jobs' if g.user and g.user.role == 'student' else 'auth.register_student') }}">Explore Jobs</a></li>
+                        <li><a href="{{ url_for('student.challenges' if g.user and g.user.role == 'student' else 'auth.register_student') }}">Skill Challenges</a></li>
+                        <li><a href="{{ url_for('auth.register_student') }}">Create Student Profile</a></li>
+                        <li><a href="{{ url_for('main.index') }}#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h5>For Recruiters</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('auth.register_recruiter') }}">Post a Job Opening</a></li>
+                        <li><a href="{{ url_for('auth.register_recruiter') }}">Create Custom Challenge</a></li>
+                        <li><a href="{{ url_for('recruiter.dashboard' if g.user and g.user.role == 'recruiter' else 'auth.login') }}">Candidate Comparison</a></li>
+                        <li><a href="{{ url_for('auth.login') }}">Recruiter Portal</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Company & Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('main.about') }}">About ChallengeHire</a></li>
+                        <li><a href="{{ url_for('main.contact') }}">Contact Support</a></li>
+                        <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>&copy; 2025 ChallengeHire Inc. All rights reserved. Practical recruitment system.</div>
+                <div style="display: flex; gap: 16px;">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+                        Database Connected
+                    </span>
+                    <span>v2.4.0</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

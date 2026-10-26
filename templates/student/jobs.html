@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Jobs & AI Skill Matching | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header Banner -->
+        <div style="margin-bottom: 28px;">
+            <span class="badge badge-primary" style="margin-bottom: 8px;">Job Directory</span>
+            <h1 style="font-size: 2rem; font-weight: 800;">Find Your Next Engineering Role</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                Every job card calculates an instant AI skill fit based on your verified capabilities.
+            </p>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="card" style="margin-bottom: 32px; padding: 20px;">
+            <form method="GET" action="{{ url_for('student.jobs') }}" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 14px; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Search Keywords</label>
+                    <input type="text" name="q" class="form-control" placeholder="Job title, tech, company..." value="{{ search_query }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Experience Level</label>
+                    <select name="experience" class="form-control">
+                        <option value="">All Experience</option>
+                        <option value="entry" {% if experience == 'entry' %}selected{% endif %}>Entry Level</option>
+                        <option value="mid" {% if experience == 'mid' %}selected{% endif %}>Mid Level</option>
+                        <option value="senior" {% if experience == 'senior' %}selected{% endif %}>Senior</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Filter by Skill</label>
+                    <select name="skill" class="form-control">
+                        <option value="">All Skills</option>
+                        {% for sk in all_skills %}
+                            <option value="{{ sk.name }}" {% if skill_filter == sk.name %}selected{% endif %}>{{ sk.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; height: 42px;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                        <input type="checkbox" name="remote" value="1" {% if is_remote == '1' %}checked{% endif %}>
+                        <span>Remote Only</span>
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary" style="height: 44px; padding: 0 20px;">Filter</button>
+                    {% if search_query or experience or skill_filter or is_remote %}
+                        <a href="{{ url_for('student.jobs') }}" class="btn btn-secondary" style="height: 44px; padding: 0 12px; margin-left: 6px;" title="Reset filters">✕</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Job Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+            {% for item in job_cards %}
+                {% set job = item.job %}
+                {% set match = item.match_data %}
+                <div class="card card-hoverable" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <!-- Header with Match Pill -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <span class="badge badge-info" style="font-size: 0.75rem; margin-bottom: 4px;">{{ job.company.name }}</span>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy-dark);">{{ job.title }}</h3>
+                            </div>
+                            <span class="match-pill {{ 'match-high' if match.match_percentage >= 80 else ('match-med' if match.match_percentage >= 50 else 'match-low') }}" title="{{ match.fit_category }}">
+                                {{ match.match_percentage }}% Match
+                            </span>
+                        </div>
+
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <span>📍 {{ 'Remote' if job.is_remote else job.location }}</span>
+                            <span>💼 {{ job.employment_type.replace('_', ' ').title() }}</span>
+                            <span>💰 {{ job.salary_min|currency }} - {{ job.salary_max|currency }}</span>
+                        </div>
+
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                            {{ job.description[:140] }}...
+                        </p>
+
+                        <!-- Required Skills Tags with match indicators -->
+                        <div style="margin-bottom: 18px;">
+                            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">
+                                Required Skills
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                {% set matched_names = match.matched_skills | map(attribute='name') | list %}
+                                {% for s in job.skills_list %}
+                                    {% if s in matched_names %}
+                                        <span class="skill-tag matched" title="Matched in your profile">✓ {{ s }}</span>
+                                    {% else %}
+                                        <span class="skill-tag missing" title="Skill gap">✗ {{ s }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {% if job.associated_challenge_id %}
+                            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.8rem; color: #6b21a8; margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+                                <span>⚡</span> <span>Has Linked Challenge: <strong>{{ job.challenge.title[:30] }}...</strong></span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                        {% if item.is_applied %}
+                            <span class="badge {{ item.application_status|status_badge }}">
+                                Applied: {{ item.application_status }}
+                            </span>
+                            <a href="{{ url_for('student.job_detail', job_id=job.id) }}" class="btn btn-sm btn-secondary">
+                                View Status
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('student.skill_gap', job_id=job.id) }}" style="font-size: 0.8rem; color: var(--purple-accent); font-weight: 600;">
+                                AI Gap Analysis &rarr;
+                            </a>
+                            <a href="{{ url_for('student.job_detail', job_id=job.id) }}" class="btn btn-sm btn-primary">
+                                View & Apply
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">🔍</div>
+                    <h3>No job openings found matching your criteria</h3>
+                    <p style="color: var(--text-secondary); margin-top: 6px;">Try adjusting your search keywords, experience level, or remote filter.</p>
+                    <a href="{{ url_for('student.jobs') }}" class="btn btn-secondary" style="margin-top: 16px;">Reset All Filters</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

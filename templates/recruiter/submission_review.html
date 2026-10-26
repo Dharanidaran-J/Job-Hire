@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Review Submission - {{ student.full_name }} | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
+            <a href="{{ url_for('recruiter.applicants') }}">&larr; Back to Applicants Funnel</a> /
+            <span>Review Submission: {{ student.full_name }}</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+            <!-- Left Column: Deliverables & Code Evidence -->
+            <div>
+                <div class="card" style="padding: 32px; margin-bottom: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
+                        <div>
+                            <span class="badge badge-success" style="margin-bottom: 6px;">Challenge Deliverables</span>
+                            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--navy-dark);">
+                                {{ challenge.title }}
+                            </h1>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+                                Candidate: <strong>{{ student.full_name }}</strong> &bull; {{ student.college_name }}
+                            </div>
+                        </div>
+
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.8rem; font-weight: 900; color: var(--primary);">
+                                {{ submission.score }}/100
+                            </div>
+                            <span class="badge {{ submission.status|status_badge }}">Status: {{ submission.status.title() }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Project Links & Evidence -->
+                    <div style="background: #f8fafc; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 18px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark);">
+                            Documented Project Deliverables
+                        </div>
+
+                        {% if submission.github_repo_url %}
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>📦 <strong>GitHub Repository:</strong></span>
+                                <a href="{{ submission.github_repo_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-dark" style="font-size: 0.8rem;">
+                                    Inspect Source Code &rarr;
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if submission.live_demo_url %}
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>🌐 <strong>Live Demo Deployment:</strong></span>
+                                <a href="{{ submission.live_demo_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" style="font-size: 0.8rem;">
+                                    Open Live Demo &rarr;
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if submission.project_file %}
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>📁 <strong>Project Archive:</strong> {{ submission.project_file }}</span>
+                                <span class="badge badge-secondary">Uploaded</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Written Technical Explanation -->
+                    <div style="margin-bottom: 28px;">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 10px;">Candidate Approach & Architecture Explanation</h3>
+                        <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 18px; line-height: 1.7; color: var(--text-secondary); white-space: pre-line; font-size: 0.95rem;">
+                            {{ submission.explanation }}
+                        </div>
+                    </div>
+
+                    <!-- AI Assessor Evaluation Box -->
+                    <div class="card" style="background: #faf5ff; border: 1.5px solid #e9d5ff; padding: 22px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 1.3rem;">🤖</span>
+                            <h4 style="font-size: 1.1rem; color: #581c87; font-weight: 800;">AI Assessor Insights & Heuristics</h4>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #6b21a8; margin-bottom: 14px;">
+                            This rubric was generated through automated analysis of repository links, architectural terminology, and spec completeness.
+                        </p>
+                        <div style="background: #ffffff; border: 1px solid #d8b4fe; border-radius: var(--radius-sm); padding: 16px; font-size: 0.9rem; color: #374151; line-height: 1.6; white-space: pre-line;">
+                            {{ submission.feedback or 'AI evaluation notes are being computed.' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recruiter Grading Form -->
+            <div>
+                <div class="card" style="padding: 24px; position: sticky; top: 90px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+                        <span style="font-size: 1.25rem;">✍️</span>
+                        <h3 class="card-title" style="font-size: 1.15rem;">Recruiter Rubric & Verdict</h3>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('recruiter.review_submission', submission_id=submission.id) }}">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Code Quality & Architecture (0-30 Pts)
+                            </label>
+                            <input type="number" name="code_quality_score" id="code_score" class="form-control" min="0" max="30" value="{{ eval_result.code_quality_score if eval_result else 28 }}" oninput="calcTotal()" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Functionality & Specs (0-40 Pts)
+                            </label>
+                            <input type="number" name="functionality_score" id="func_score" class="form-control" min="0" max="40" value="{{ eval_result.functionality_score if eval_result else 36 }}" oninput="calcTotal()" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                UI/UX & Documentation (0-30 Pts)
+                            </label>
+                            <input type="number" name="ui_ux_score" id="ui_score" class="form-control" min="0" max="30" value="{{ eval_result.ui_ux_score if eval_result else 28 }}" oninput="calcTotal()" required>
+                        </div>
+
+                        <!-- Computed Total -->
+                        <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 700; font-size: 0.9rem;">Total Evaluated Score:</span>
+                            <span id="total_score_display" style="font-size: 1.35rem; font-weight: 900; color: var(--primary);">
+                                {{ submission.score }}/100
+                            </span>
+                        </div>
+
+                        <!-- Application Status Change -->
+                        {% if application %}
+                            <div class="form-group">
+                                <label class="form-label">Update Application Decision</label>
+                                <select name="application_status" class="form-control">
+                                    <option value="Under Review" {% if application.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                    <option value="Shortlisted" {% if application.status == 'Shortlisted' %}selected{% endif %}>Shortlist Candidate</option>
+                                    <option value="Selected" {% if application.status == 'Selected' %}selected{% endif %}>Select for Hire</option>
+                                    <option value="Rejected" {% if application.status == 'Rejected' %}selected{% endif %}>Reject Application</option>
+                                </select>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label class="form-label">Recruiter Review Comments</label>
+                            <textarea name="recruiter_comments" class="form-control" rows="4" placeholder="Feedback visible to candidate and hiring team...">{{ eval_result.recruiter_comments if eval_result else '' }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Save Rubric & Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function calcTotal() {
+    const c = parseInt(document.getElementById('code_score').value) || 0;
+    const f = parseInt(document.getElementById('func_score').value) || 0;
+    const u = parseInt(document.getElementById('ui_score').value) || 0;
+    const total = c + f + u;
+    document.getElementById('total_score_display').textContent = total + "/100";
+}
+</script>
+{% endblock %}

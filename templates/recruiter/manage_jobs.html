@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Job Openings | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: 6px;">Recruiter Management</span>
+                <h1 style="font-size: 2rem; font-weight: 800;">Manage Job Openings</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Monitor applicant pipelines, adjust job requirements, and manage recruitment statuses.
+                </p>
+            </div>
+            <a href="{{ url_for('recruiter.create_job') }}" class="btn btn-primary">
+                ➕ Post New Job Opening
+            </a>
+        </div>
+
+        <div class="card" style="padding: 24px;">
+            {% if jobs %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Location & Type</th>
+                                <th>Salary Range</th>
+                                <th>Applicants</th>
+                                <th>Status</th>
+                                <th>Linked Challenge</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700; font-size: 0.98rem; color: var(--navy-dark);">
+                                            {{ job.title }}
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                            Created {{ job.created_at.strftime('%b %d, %Y') }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.85rem;">{{ 'Remote' if job.is_remote else job.location }}</div>
+                                        <div style="font-size: 0.78rem; color: var(--text-secondary); text-transform: capitalize;">
+                                            {{ job.employment_type.replace('_', ' ') }} &bull; {{ job.experience_level }}
+                                        </div>
+                                    </td>
+                                    <td style="font-size: 0.85rem;">
+                                        {{ job.salary_min|currency }} - {{ job.salary_max|currency }}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('recruiter.applicants', job_id=job.id) }}" class="badge badge-primary" style="font-size: 0.85rem; padding: 4px 10px; text-decoration: none;">
+                                            {{ job.applications.count() }} Candidates
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ job.status|status_badge }}">{{ job.status.title() }}</span>
+                                    </td>
+                                    <td style="font-size: 0.82rem;">
+                                        {% if job.associated_challenge_id and job.challenge %}
+                                            <span style="color: var(--purple-accent); font-weight: 600;">⚡ {{ job.challenge.title[:24] }}...</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 6px;">
+                                            <a href="{{ url_for('recruiter.edit_job', job_id=job.id) }}" class="btn btn-sm btn-secondary" style="font-size: 0.78rem;">
+                                                Edit
+                                            </a>
+                                            <form method="POST" action="{{ url_for('recruiter.toggle_job_status', job_id=job.id) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-dark" style="font-size: 0.78rem;">
+                                                    {{ 'Close' if job.status == 'active' else 'Reopen' }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">💼</div>
+                    <h3>No job openings created yet</h3>
+                    <p style="color: var(--text-secondary); margin-top: 6px;">
+                        Post your first job opening to start matching with vetted practical candidates.
+                    </p>
+                    <a href="{{ url_for('recruiter.create_job') }}" class="btn btn-primary" style="margin-top: 16px;">
+                        Create Your First Job
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

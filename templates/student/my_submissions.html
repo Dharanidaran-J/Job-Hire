@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}My Challenge Submissions | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 36px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <span class="badge badge-success" style="margin-bottom: 6px;">Portfolio Evidence</span>
+                <h1 style="font-size: 2rem; font-weight: 800;">My Practical Submissions</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Your completed coding challenges, rubric breakdowns, and verified skills.
+                </p>
+            </div>
+            <a href="{{ url_for('student.challenges') }}" class="btn btn-primary">
+                Explore More Challenges &rarr;
+            </a>
+        </div>
+
+        {% if submissions %}
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                {% for sub in submissions %}
+                    <div class="card" style="padding: 28px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <span class="badge badge-{{ 'success' if sub.challenge.difficulty_level == 'beginner' else ('warning' if sub.challenge.difficulty_level == 'intermediate' else 'danger') }}" style="margin-bottom: 6px;">
+                                    {{ sub.challenge.difficulty_level.title() }}
+                                </span>
+                                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--navy-dark);">
+                                    {{ sub.challenge.title }}
+                                </h2>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                                    Submitted on {{ sub.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                            </div>
+
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #16a34a;">
+                                    {{ sub.score }}/100
+                                </div>
+                                <span class="badge {{ sub.status|status_badge }}">Status: {{ sub.status.title() }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Rubric Breakdown -->
+                        {% if sub.evaluation %}
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Code Architecture</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--navy-dark);">{{ sub.evaluation.code_quality_score }}/30</div>
+                                </div>
+
+                                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Functionality & Specs</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--navy-dark);">{{ sub.evaluation.functionality_score }}/40</div>
+                                </div>
+
+                                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">UI/UX & Documentation</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--navy-dark);">{{ sub.evaluation.ui_ux_score }}/30</div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Evidence Links -->
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); font-size: 0.9rem;">
+                            {% if sub.github_repo_url %}
+                                <a href="{{ sub.github_repo_url }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                                    <span>📦</span> <span>GitHub Repository &rarr;</span>
+                                </a>
+                            {% endif %}
+                            {% if sub.live_demo_url %}
+                                <a href="{{ sub.live_demo_url }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--purple-accent);">
+                                    <span>🌐</span> <span>Live Demo &rarr;</span>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div style="background: #f8fafc; border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+                            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: 6px;">
+                                Evaluation Feedback & Recommendations
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; white-space: pre-line;">
+                                {{ sub.feedback or 'Your submission is pending review.' }}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end;">
+                            <a href="{{ url_for('student.challenge_detail', challenge_id=sub.challenge_id) }}" class="btn btn-sm btn-secondary">
+                                Revisit Challenge Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">⚡</div>
+                <h3>No challenge submissions yet</h3>
+                <p style="color: var(--text-secondary); margin-top: 6px;">
+                    Take on real-world practical challenges to prove your engineering skills to top hiring managers.
+                </p>
+                <a href="{{ url_for('student.challenges') }}" class="btn btn-primary" style="margin-top: 16px;">
+                    Explore Available Challenges
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

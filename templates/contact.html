@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Support | ChallengeHire{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width: 680px;">
+        <div class="card" style="padding: 36px;">
+            <span class="badge badge-primary" style="margin-bottom: 12px;">Get In Touch</span>
+            <h1 style="font-size: 2rem; margin-bottom: 12px;">Contact Our Team</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                Have a question regarding recruitment partnerships, student challenges, or university integrations? Send us a message below.
+            </p>
+
+            <form method="POST" action="{{ url_for('main.contact') }}">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Jane Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="jane@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" placeholder="Partnership / Support Inquiry" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea name="message" class="form-control" rows="4" placeholder="How can our technical team help you?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
